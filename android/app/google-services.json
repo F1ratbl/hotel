@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "968802539905",
+    "project_id": "mg-hill-hotel-c10d4",
+    "storage_bucket": "mg-hill-hotel-c10d4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:968802539905:android:5a183fa72bcd1e3fadb080",
+        "android_client_info": {
+          "package_name": "com.example.hotel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbWX7xtliU4zR75Yycp8rYBLjN7LW3VJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
