@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hotel/page/add_room.dart';
+import 'package:hotel/page/black_list.dart';
 import 'package:hotel/page/room_info.dart';
 import 'package:hotel/service/service.dart';
 
@@ -21,7 +22,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       final data = await _roomService.getRooms();
       print("Gelen veri: $data");
 
-      // Veriyi room_number'a göre sıralama işlemi
       data.sort((a, b) => a['room_number'].compareTo(b['room_number']));
 
       setState(() {
@@ -34,6 +34,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         isLoading = false;
       });
     }
+  }
+
+  void fetchAndStatePage() async {
+    await fetchRooms();
+    setState(() {});
   }
 
   @override
@@ -54,73 +59,98 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final phoneWidth = MediaQuery.of(context).size.width - 48;
 
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            height: 120,
-            width: double.infinity,
-            color: const Color(0xff4B0150),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                TabBar(
-                  controller: _tabController,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  tabs: [
-                    _tabButton(context, 'Odalar'),
-                    _tabButton(context, 'Temiz'),
-                    _tabButton(context, 'Kirli'),
-                    _tabButton(context, 'Arızalı'),
-                    _tabButton(context, 'Dolu'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddRoom()),
-                );
-              },
-              child: Container(
-                height: 50,
-                width: double.infinity,
-                color: Color(0xffC71585),
-                child: Center(
-                  child: Text(
-                    '+ Yeni Oda Ekle',
-                    style: _sectionTextStyle(),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.delayed(const Duration(seconds: 2));
+          fetchRooms();
+          setState(() {});
+        },
+        child: Column(
+          children: [
+            Container(
+              height: 120,
+              width: double.infinity,
+              color: const Color(0xff4B0150),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    tabs: [
+                      _tabButton(context, 'Odalar'),
+                      _tabButton(context, 'Temiz'),
+                      _tabButton(context, 'Kirli'),
+                      _tabButton(context, 'Arızalı'),
+                      _tabButton(context, 'Dolu'),
+                    ],
                   ),
-                ),
+                ],
               ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+            Row(
               children: [
-                _tabBarBuilder(phoneWidth, 'all'), // Tüm odalar
-                _tabBarBuilder(phoneWidth, 'Temiz'), // Temiz odalar
-                _tabBarBuilder(phoneWidth, 'Kirli'), // Kirli odalar
-                _tabBarBuilder(phoneWidth, 'Arızalı'), // Arızalı odalar
-                _tabBarBuilder(phoneWidth, 'Dolu'), // Dolu odalar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: _button(context, phoneWidth  ,'+ Yeni Oda Ekle', Color(0xffC71585), () => AddRoom(fetchAndStatePage: fetchAndStatePage,)),
+                ),
+                Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: _button(context, phoneWidth,'Kara Liste',Color(0xff2B2929), () => DarkList(fetchAndStatePage: fetchAndStatePage)),
+            ),
               ],
             ),
-          ),
-        ],
+            
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _tabBarBuilder(phoneWidth, 'all'),
+                  _tabBarBuilder(phoneWidth, 'Temiz'),
+                  _tabBarBuilder(phoneWidth, 'Kirli'),
+                  _tabBarBuilder(phoneWidth, 'Arızalı'),
+                  _tabBarBuilder(phoneWidth, 'Dolu'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  GestureDetector _button(BuildContext context,double phoneWidth, String tittle , Color color, Widget Function() page) {
+    return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => page()),
+                  );
+                },
+                child: Container(
+                  height: 50,
+                  width: phoneWidth / 2,
+                  color: color,
+                  child: Center(
+                    child: Text(
+                      tittle,
+                      style: _sectionTextStyle(),
+                    ),
+                  ),
+                ),
+              );
+  }
+
   Widget _tabBarBuilder(double phoneWidth, String status) {
-    // Tüm odalar gösterildiğinde filtreleme yapma
-    List<dynamic> filteredList =
-        (status == 'all') ? dataList : dataList.where((room) => room['room_status'] == status).toList();
+    List<dynamic> filteredList;
+    if (status == 'all') {
+      filteredList = dataList;
+    } else if (status == 'Arızalı') {
+      filteredList = dataList.where((room) => room['has_Issue'] == true).toList();
+    } else {
+      filteredList = dataList.where((room) => room['room_status'] == status).toList();
+    }
 
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -144,6 +174,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           toiletPaperStatus: filteredList[index]['toilet_paper_status'],
           towelStatus: filteredList[index]['towel_status'],
           waterStatus: filteredList[index]['water_status'],
+          earTruncheonStatus: filteredList[index]['ear_truncheon_status'],
+          laundryBagStatus : filteredList[index]['laundry_bag_status'],
+          shampooStatus : filteredList[index]['shampoo_status'],
+          showerGelStatus : filteredList[index]['shower_gel_status'],
+          soapStatus : filteredList[index]['soap_status'],
+          fullStatus : filteredList[index]['full_status'],
+          fetchAndStatePage : fetchAndStatePage,
         );
       },
     );
@@ -183,6 +220,13 @@ class _Card extends StatelessWidget {
   final bool toiletPaperStatus;
   final bool towelStatus;
   final bool waterStatus;
+  final bool earTruncheonStatus;
+  final bool laundryBagStatus;
+  final bool shampooStatus;
+  final bool showerGelStatus;
+  final bool soapStatus;
+  final bool fullStatus;
+  final Function fetchAndStatePage;
 
   const _Card({
     super.key,
@@ -197,14 +241,20 @@ class _Card extends StatelessWidget {
     required this.toiletPaperStatus,
     required this.towelStatus,
     required this.waterStatus,
+    required this.earTruncheonStatus,
+    required this.laundryBagStatus,
+    required this.shampooStatus,
+    required this.showerGelStatus,
+    required this.soapStatus,
+    required this.fullStatus,
+    required this.fetchAndStatePage,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Renk belirleme işlemini burada yapıyoruz
     Color roomColor;
     if (roomStatus == 'Arızalı') {
-      roomColor = const Color(0xff63C5DA);
+      roomColor = const Color(0xffC21807);
     } else if (roomStatus == 'Kirli') {
       roomColor = const Color(0xffC21807);
     } else if (roomStatus == 'Temiz') {
@@ -219,6 +269,7 @@ class _Card extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => RoomInfo(
+              fetchAndStatePage: fetchAndStatePage,
               roomNumber: roomNumber,
               roomStatus: roomStatus,
               issueNote: issueNote,
@@ -229,6 +280,12 @@ class _Card extends StatelessWidget {
               toiletPaperStatus: toiletPaperStatus,
               towelStatus: towelStatus,
               waterStatus: waterStatus,
+              earTruncheonStatus : earTruncheonStatus,
+              laundryBagStatus : laundryBagStatus,
+              shampooStatus : shampooStatus,
+              showerGelStatus : showerGelStatus,
+              soapStatus : soapStatus,
+              fullStatus: fullStatus,
             ),
           ),
         );
@@ -256,7 +313,7 @@ class _Card extends StatelessWidget {
               ),
             ),
 
-            if (roomStatus == 'Arızalı') ...[
+            if (hasIssue == true) ...[
               const SizedBox(height: 8.0),
               Icon(
                 Icons.notifications_active,

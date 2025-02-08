@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hotel/service/service.dart';
 
 class AddRoom extends StatefulWidget {
-  const AddRoom({super.key});
+  final fetchAndStatePage;
+  const AddRoom({super.key, required this.fetchAndStatePage});
 
   @override
   State<AddRoom> createState() => _AddRoomState();
@@ -11,19 +12,23 @@ class AddRoom extends StatefulWidget {
 class _AddRoomState extends State<AddRoom> {
   final _roomNumberController = TextEditingController();
   final _issueNoteController = TextEditingController();
-
-  String? _roomStatus;
-  bool? _cleanlinessStatus;
-  bool? _coffeeStatus;
-  bool? _teaStatus;
-  bool? _toiletPaperStatus;
-  bool? _towelStatus;
-  bool? _waterStatus;
-  bool? _hasIssue;
+  String _roomStatus = 'Kirli';
+  bool _cleanlinessStatus = false;
+  bool _coffeeStatus = false;
+  bool _teaStatus = false;
+  bool _toiletPaperStatus = false;
+  bool _towelStatus = false;
+  bool _waterStatus = false;
+  bool _hasIssue = false;
+  bool _shampooStatus = false;
+  bool _showerGelStatus = false;
+  bool _laundryBagStatus = false;
+  bool _earTruncheonStatus = false;
+  bool _soapStatus = false;
+  bool _fullStatus = false;
 
   final RoomService _roomService = RoomService();
 
-  // Oda durumu için kontrol fonksiyonu
   void _determineRoomStatus() {
     setState(() {
       if (_hasIssue == true) {
@@ -33,7 +38,12 @@ class _AddRoomState extends State<AddRoom> {
           _teaStatus == false ||
           _toiletPaperStatus == false ||
           _towelStatus == false ||
-          _waterStatus == false) {
+          _waterStatus == false ||
+          _shampooStatus == false ||
+          _showerGelStatus == false ||
+          _laundryBagStatus == false ||
+          _earTruncheonStatus == false ||
+          _soapStatus == false) {
         _roomStatus = 'Kirli';
       } else {
         _roomStatus = 'Temiz';
@@ -51,8 +61,14 @@ class _AddRoomState extends State<AddRoom> {
       'toilet_paper_status': _toiletPaperStatus,
       'towel_status': _towelStatus,
       'water_status': _waterStatus,
-      'has_issue': _hasIssue,
+      'shampoo_status': _shampooStatus,
+      'shower_gel_status': _showerGelStatus,
+      'laundry_bag_status': _laundryBagStatus,
+      'ear_truncheon_status': _earTruncheonStatus,
+      'soap_status': _soapStatus,
+      'has_Issue': _hasIssue,
       'issue_note': _hasIssue == true ? _issueNoteController.text : '',
+      'full_status': _fullStatus,
     };
 
     try {
@@ -69,7 +85,7 @@ class _AddRoomState extends State<AddRoom> {
   }
 
   Widget buildDropdown<T>({
-    required T? value,
+    required T value,
     required String labelText,
     required List<T> items,
     required ValueChanged<T?> onChanged,
@@ -87,8 +103,8 @@ class _AddRoomState extends State<AddRoom> {
         );
       }).toList(),
       onChanged: (newValue) {
-        onChanged(newValue);
-        _determineRoomStatus();  // Her seçimden sonra oda durumunu kontrol et
+        onChanged(newValue ?? false as T);
+        _determineRoomStatus();
       },
     );
   }
@@ -104,7 +120,6 @@ class _AddRoomState extends State<AddRoom> {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              // Oda Numarası
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
@@ -117,133 +132,181 @@ class _AddRoomState extends State<AddRoom> {
                 ),
               ),
 
-              // Temizlik Durumu
               buildDropdown<bool>(
                 value: _cleanlinessStatus,
                 labelText: 'Temizlik Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _cleanlinessStatus = newValue;
+                    _cleanlinessStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Kahve Durumu
               buildDropdown<bool>(
                 value: _coffeeStatus,
                 labelText: 'Kahve Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _coffeeStatus = newValue;
+                    _coffeeStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Çay Durumu
               buildDropdown<bool>(
                 value: _teaStatus,
                 labelText: 'Çay Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _teaStatus = newValue;
+                    _teaStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Tuvalet Kağıdı Durumu
               buildDropdown<bool>(
                 value: _toiletPaperStatus,
                 labelText: 'Tuvalet Kağıdı Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _toiletPaperStatus = newValue;
+                    _toiletPaperStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Havlu Durumu
               buildDropdown<bool>(
                 value: _towelStatus,
                 labelText: 'Havlu Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _towelStatus = newValue;
+                    _towelStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Su Durumu
               buildDropdown<bool>(
                 value: _waterStatus,
                 labelText: 'Su Durumu',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _waterStatus = newValue;
+                    _waterStatus = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Arıza Var mı?
+              buildDropdown<bool>(
+                value: _shampooStatus,
+                labelText: 'Şampuan Durumu',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _shampooStatus = newValue ?? false;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
+              buildDropdown<bool>(
+                value: _showerGelStatus,
+                labelText: 'Duş Jeli Durumu',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _showerGelStatus = newValue ?? false;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
+              buildDropdown<bool>(
+                value: _laundryBagStatus,
+                labelText: 'Çamaşır Torbası Durumu',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _laundryBagStatus = newValue ?? false;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
+              buildDropdown<bool>(
+                value: _earTruncheonStatus,
+                labelText: 'Kulak Pamuğu Durumu',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _earTruncheonStatus = newValue ?? false;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
+              buildDropdown<bool>(
+                value: _soapStatus,
+                labelText: 'Sabun Durumu',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _soapStatus = newValue ?? false;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 16.0),
+              buildDropdown<bool>(
+                value: _fullStatus,
+                labelText: 'Oda Dolu mu?',
+                items: [true, false],
+                onChanged: (newValue) {
+                  setState(() {
+                    _fullStatus = newValue ?? false;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
               buildDropdown<bool>(
                 value: _hasIssue,
                 labelText: 'Sorun Var mı?',
                 items: [true, false],
                 onChanged: (newValue) {
                   setState(() {
-                    _hasIssue = newValue;
+                    _hasIssue = newValue ?? false;
                   });
                 },
               ),
               const SizedBox(height: 16.0),
 
-              // Arıza Notu (only shown if issue exists)
               if (_hasIssue == true)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: TextField(
                     controller: _issueNoteController,
                     decoration: const InputDecoration(
-                      labelText: 'Oda Notu',
+                      labelText: 'Arıza Notu',
                       border: OutlineInputBorder(),
                     ),
+                    maxLines: 3,
                   ),
                 ),
 
-              // Oda Durumu
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  'Oda Durumu: ${_roomStatus ?? 'Belirlenmedi'}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-
-              // Oda Ekle Button
-              GestureDetector(
-                onTap: addRoom,
-                child: Container(
-                  height: 50,
-                  width: double.infinity,
-                  color: const Color(0xffC71585),
-                  child: const Center(
-                    child: Text(
-                      'Oda Ekle',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  addRoom();
+                  widget.fetchAndStatePage();
+                },
+                child: const Text('Oda Ekle'),
               ),
             ],
           ),

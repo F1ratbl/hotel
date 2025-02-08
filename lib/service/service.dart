@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RoomService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // GET: Tüm odaların listesini çekme
+  // GET
   Future<List<Map<String, dynamic>>> getRooms() async {
     try {
       QuerySnapshot snapshot = await _db.collection('contacts').get();
@@ -18,7 +18,7 @@ class RoomService {
     }
   }
 
-  // POST: Yeni oda ekleme
+  // POST
   Future<void> addRoom(Map<String, dynamic> roomData) async {
     try {
       await _db.collection('contacts').add(roomData);
@@ -27,33 +27,41 @@ class RoomService {
     }
   }
 
-// PUT: Oda güncelleme (belirli bir dokümanı güncelleme)
+// PUT
 Future<void> updateRoom(int roomNum, Map<String, dynamic> updatedData) async {
   try {
-    // Oda numarasına göre belgeyi arayın
     QuerySnapshot querySnapshot = await _db
         .collection('contacts')
         .where('room_number', isEqualTo: roomNum)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Belgeyi güncelleyin
       await querySnapshot.docs.first.reference.update(updatedData);
-      print('Belge başarıyla güncellendi.');
     } else {
       print('Hata: Belge bulunamadı.');
     }
   } catch (e) {
     print('Hata: $e');
   }
+  
+}
+// DELETE
+Future<void> deleteRoomByNumber(int roomNumber) async {
+  try {
+    var querySnapshot = await _db.collection('contacts')
+        .where('room_number', isEqualTo: roomNumber)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      for (var doc in querySnapshot.docs) {
+        await _db.collection('contacts').doc(doc.id).delete();
+      }
+    } else {
+      print('Oda bulunamadı');
+    }
+  } catch (e) {
+    print('Hata: $e');
+  }
 }
 
-  // DELETE: Oda silme
-  Future<void> deleteRoom(String docId) async {
-    try {
-      await _db.collection('contacts').doc(docId).delete();
-    } catch (e) {
-      print('Hata: $e');
-    }
-  }
 }

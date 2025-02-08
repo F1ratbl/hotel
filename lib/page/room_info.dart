@@ -3,6 +3,7 @@ import 'package:hotel/service/service.dart';
 
 class RoomInfo extends StatefulWidget {
   final int roomNumber;
+  final fetchAndStatePage;
   final String roomStatus;
   late final String issueNote;
   bool hasIssue;
@@ -12,10 +13,17 @@ class RoomInfo extends StatefulWidget {
   bool toiletPaperStatus;
   bool towelStatus;
   bool waterStatus;
+  bool earTruncheonStatus;
+  bool laundryBagStatus;
+  bool shampooStatus;
+  bool showerGelStatus;
+  bool soapStatus;
+  bool fullStatus;
 
   RoomInfo({
     super.key,
     required this.roomNumber,
+    required this.fetchAndStatePage,
     required this.roomStatus,
     required this.issueNote,
     required this.hasIssue,
@@ -25,6 +33,12 @@ class RoomInfo extends StatefulWidget {
     required this.toiletPaperStatus,
     required this.towelStatus,
     required this.waterStatus,
+    required this.earTruncheonStatus,
+    required this.laundryBagStatus,
+    required this.shampooStatus,
+    required this.showerGelStatus,
+    required this.soapStatus,
+    required this.fullStatus,
   });
 
   @override
@@ -45,10 +59,16 @@ class _RoomInfoState extends State<RoomInfo> {
     bool tuvaletKagidiDurum = widget.toiletPaperStatus;
     bool havluDurum = widget.towelStatus;
     bool suDurum = widget.waterStatus;
+    bool sampuanDurum = widget.shampooStatus;
+    bool dusJeliDurum = widget.showerGelStatus;
+    bool sabunDurum = widget.soapStatus;
+    bool camasirPosetiDurum = widget.laundryBagStatus;
+    bool kulakCopuDurum = widget.earTruncheonStatus;
+    bool doluOda = widget.fullStatus;
     Color statusColor;
 
     if (widget.roomStatus == 'Arızalı') {
-      statusColor = const Color(0xff63C5DA);
+      statusColor = const Color(0xffC21807);
     } else if (widget.roomStatus == 'Kirli') {
       statusColor = const Color(0xffC21807);
     } else if (widget.roomStatus == 'Temiz') {
@@ -63,7 +83,7 @@ class _RoomInfoState extends State<RoomInfo> {
           backgroundColor: const Color(0xff4B0150),
           title: Text('Oda No: ${widget.roomNumber}', style: statusStyle()),
         ),
-        body: Padding(
+        body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +101,11 @@ class _RoomInfoState extends State<RoomInfo> {
               ),
               const SizedBox(height: 20),
 
-              // Checkbox'lar
+              _buildCheckBox('Oda Dolu', doluOda, (value) {
+                setState(() {
+                  widget.fullStatus = value ?? false;
+                });
+              }),
               _buildCheckBox('Oda Temizlendi', temizlikDurum, (value) {
                 setState(() {
                   widget.cleanlinessStatus = value ?? false;
@@ -109,7 +133,38 @@ class _RoomInfoState extends State<RoomInfo> {
               }),
               _buildCheckBox('Su Eklendi', suDurum, (value) {
                 setState(() {
-                  widget.waterStatus = !widget.waterStatus;
+                  widget.waterStatus = value ?? false;
+                  ;
+                });
+              }),
+              _buildCheckBox('Şampuan Eklendi', sampuanDurum, (value) {
+                setState(() {
+                  widget.shampooStatus = value ?? false;
+                  ;
+                });
+              }),
+              _buildCheckBox('Duş Jeli Eklendi', dusJeliDurum, (value) {
+                setState(() {
+                  widget.showerGelStatus = value ?? false;
+                  ;
+                });
+              }),
+              _buildCheckBox('Kulak Çöpü Eklendi', kulakCopuDurum, (value) {
+                setState(() {
+                  widget.earTruncheonStatus = value ?? false;
+                  ;
+                });
+              }),
+              _buildCheckBox('Çamaşır Poşeti Eklendi', camasirPosetiDurum, (value) {
+                setState(() {
+                  widget.laundryBagStatus = value ?? false;
+                  ;
+                });
+              }),
+              _buildCheckBox('Sabun Eklendi', sabunDurum, (value) {
+                setState(() {
+                  widget.soapStatus = value ?? false;
+                  ;
                 });
               }),
               _buildCheckBox('Arıza Var', arizaDurum, (value) {
@@ -122,27 +177,48 @@ class _RoomInfoState extends State<RoomInfo> {
 
               const SizedBox(height: 20),
 
-              // Güncelleme Butonu
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GestureDetector(
-                  onTap: () {
-                    // Veritabanı güncelleme işlemi
-                    _updateRoomInfo(temizlikDurum, kahveDurum, cayDurum, tuvaletKagidiDurum, havluDurum, suDurum,
-                        arizaDurum, arizaNotu, odaDurum);
-                  },
-                  child: Container(
-                    height: 50,
-                    width: double.infinity,
-                    color: statusColor,
-                    child: Center(
-                      child: Text(
-                        'Güncelle',
-                        style: statusStyle(),
-                      ),
-                    ),
-                  ),
-                ),
+                child: _infoButton(
+                    'Güncelle',
+                    temizlikDurum,
+                    kahveDurum,
+                    cayDurum,
+                    tuvaletKagidiDurum,
+                    havluDurum,
+                    suDurum,
+                    sampuanDurum,
+                    dusJeliDurum,
+                    sabunDurum,
+                    camasirPosetiDurum,
+                    kulakCopuDurum,
+                    arizaDurum,
+                    doluOda,
+                    arizaNotu,
+                    odaDurum,
+                    statusColor),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _infoButton(
+                    'Odayı Sil',
+                    temizlikDurum,
+                    kahveDurum,
+                    cayDurum,
+                    tuvaletKagidiDurum,
+                    havluDurum,
+                    suDurum,
+                    sampuanDurum,
+                    dusJeliDurum,
+                    sabunDurum,
+                    camasirPosetiDurum,
+                    kulakCopuDurum,
+                    arizaDurum,
+                    doluOda,
+                    arizaNotu,
+                    odaDurum,
+                    statusColor),
               )
             ],
           ),
@@ -151,12 +227,81 @@ class _RoomInfoState extends State<RoomInfo> {
     );
   }
 
+GestureDetector _infoButton(
+  String text,
+  bool temizlikDurum,
+  bool kahveDurum,
+  bool cayDurum,
+  bool tuvaletKagidiDurum,
+  bool havluDurum,
+  bool suDurum,
+  bool sampuanDurum,
+  bool dusJeliDurum,
+  bool sabunDurum,
+  bool camasirPosetiDurum,
+  bool kulakCopuDurum,
+  bool arizaDurum,
+  bool doluOda,
+  String arizaNotu,
+  String odaDurum,
+  Color statusColor,
+) {
+  return GestureDetector(
+    onTap: () {
+      if (text == 'Güncelle') {
+        _updateRoomInfo(
+          temizlikDurum,
+          kahveDurum,
+          cayDurum,
+          tuvaletKagidiDurum,
+          havluDurum,
+          suDurum,
+          sampuanDurum,
+          dusJeliDurum,
+          sabunDurum,
+          camasirPosetiDurum,
+          kulakCopuDurum,
+          arizaDurum,
+          doluOda,
+          arizaNotu,
+          odaDurum,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Başarıyla güncellendi')),
+        );
+      } else {
+        _service.deleteRoomByNumber(widget.roomNumber);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Başarıyla silindi')),
+        );
+      }
+
+      widget.fetchAndStatePage();
+      Navigator.pop(context);
+    },
+    child: Container(
+      height: 50,
+      width: double.infinity,
+      color: statusColor,
+      child: Center(
+        child: Text(
+          text,
+          style: statusStyle(),
+        ),
+      ),
+    ),
+  );
+}
+
+
   // Checkbox bileşeni
   Widget _buildCheckBox(String label, bool value, Function(bool?) onChanged) {
     return CheckboxListTile(
       title: Text(label),
       value: value,
-      onChanged: onChanged, // value'ya göre aktif/pasif olacak ve güncellenecek
+      onChanged: onChanged,
       activeColor: Colors.green,
       controlAffinity: ListTileControlAffinity.leading,
     );
@@ -180,19 +325,40 @@ class _RoomInfoState extends State<RoomInfo> {
   }
 
 // Veritabanı güncelleme işlemi
-  Future<void> _updateRoomInfo(bool temizlikDurum, bool kahveDurum, bool cayDurum, bool tuvaletKagidiDurum,
-      bool havluDurum, bool suDurum, bool arizaDurum, String arizaNotu, String odaDurum) async {
-    if (arizaDurum == true) {
-      odaDurum = 'Arızalı';
-    } else if (temizlikDurum == true ||
-        kahveDurum == true ||
-        cayDurum == true ||
-        tuvaletKagidiDurum == true ||
-        havluDurum == true ||
-        suDurum == true) {
-      odaDurum = 'Temiz';
-    } else {
+  Future<void> _updateRoomInfo(
+      bool temizlikDurum,
+      bool kahveDurum,
+      bool cayDurum,
+      bool tuvaletKagidiDurum,
+      bool havluDurum,
+      bool suDurum,
+      bool sampuanDurum,
+      bool dusJeliDurum,
+      bool sabunDurum,
+      bool camasirPosetiDurum,
+      bool kulakCopuDurum,
+      bool arizaDurum,
+      bool doluOda,
+      String arizaNotu,
+      String odaDurum) async {
+    if (doluOda) {
+      odaDurum = 'Dolu';
+    }
+    else if (!temizlikDurum ||
+        !kahveDurum ||
+        !cayDurum ||
+        !tuvaletKagidiDurum ||
+        !havluDurum ||
+        !suDurum ||
+        !sampuanDurum ||
+        !sabunDurum ||
+        !camasirPosetiDurum ||
+        !dusJeliDurum ||
+        !kulakCopuDurum) {
       odaDurum = 'Kirli';
+    }
+    else {
+      odaDurum = 'Temiz';
     }
 
     Map<String, dynamic> updatedData = {
@@ -202,19 +368,21 @@ class _RoomInfoState extends State<RoomInfo> {
       'toilet_paper_status': tuvaletKagidiDurum,
       'towel_status': havluDurum,
       'water_status': suDurum,
-      'has_issue': arizaDurum,
+      'shampoo_status': sampuanDurum,
+      'shower_gel_status': dusJeliDurum,
+      'soap_status': sabunDurum,
+      'laundry_bag_status': camasirPosetiDurum,
+      'ear_truncheon_status': kulakCopuDurum,
+      'has_Issue': arizaDurum,
       'issue_note': arizaNotu,
       'room_status': odaDurum,
+      'full_status': doluOda,
     };
 
-    // room_number alanına göre güncelleme yapın
     String roomNum = '${widget.roomNumber}';
-
-    // Servisi kullanarak güncelleme yapın
     await _service.updateRoom(int.parse(roomNum), updatedData);
   }
 
-  // Yazı stili
   TextStyle statusStyle() {
     return const TextStyle(
       color: Colors.white,
