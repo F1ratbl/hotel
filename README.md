@@ -22,8 +22,8 @@ Bu proje, otel işletmeleri için oda durumlarını, temizlik süreçlerini ve p
 
 Uygulama mimarisi `lib` klasörü altında şu şekilde organize edilmiştir:
 
-* `pages/`: Uygulamanın tüm arayüz ekranları (Giriş, Oda Detay, Kara Liste vb.).
-* `services/`: Firebase veri akışını ve iş mantığını yöneten servis dosyaları.
+* `page/`: Uygulamanın tüm arayüz ekranları.
+* `service/`: Firebase veri akışını ve iş mantığını yöneten servis dosyaları.
 * `main.dart`: Uygulamanın başlangıç noktası.
 * `firebase_options.dart`: Firebase yapılandırma ayarları.
 
